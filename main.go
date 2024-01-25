@@ -9,16 +9,18 @@ import (
 )
 
 var (
-	ticTacToeBoardimg *ebiten.Image
+	ticTacToeBoardImg *ebiten.Image
 	ximg              *ebiten.Image
 	oimg              *ebiten.Image
-	titleimg          *ebiten.Image
+	titleImg          *ebiten.Image
+	screenWidth       int = 800
+	screenHeight      int = 600
 )
 
 func init() {
 	var err error
 
-	ticTacToeBoardimg, _, err = ebitenutil.NewImageFromFile("img/tic_tac_toe_board.png")
+	ticTacToeBoardImg, _, err = ebitenutil.NewImageFromFile("img/tic_tac_toe_board.png")
 
 	if err != nil {
 		log.Fatal(err)
@@ -37,7 +39,7 @@ func init() {
 		log.Fatal(err)
 	}
 
-	titleimg, _, err = ebitenutil.NewImageFromFile("img/amazing_title.png")
+	titleImg, _, err = ebitenutil.NewImageFromFile("img/amazing_title.png")
 
 	if err != nil {
 		log.Fatal(err)
@@ -52,15 +54,32 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	screen.DrawImage(ticTacToeBoardimg, nil)
+	boardImgWidth := ticTacToeBoardImg.Bounds().Dx()
+	boardWidthScaleFactor := float64(screenWidth) / float64(boardImgWidth)
+	boardHeightScaleFactor := float64(screenHeight) * 0.75 / float64(ticTacToeBoardImg.Bounds().Dy())
+	boardOpts := &ebiten.DrawImageOptions{}
+
+	boardOpts.GeoM.Scale(boardWidthScaleFactor, boardHeightScaleFactor)
+	boardOpts.GeoM.Translate(0, float64(screenHeight)*0.25)
+
+	screen.DrawImage(ticTacToeBoardImg, boardOpts)
+
+	titleImgWidth := titleImg.Bounds().Dx()
+	titleWidthScaleFactor := float64(screenWidth) / float64(titleImgWidth)
+	titleHeightScaleFactor := float64(screenHeight) * 0.25 / float64(titleImg.Bounds().Dy())
+	titleOpts := &ebiten.DrawImageOptions{}
+
+	titleOpts.GeoM.Scale(titleWidthScaleFactor, titleHeightScaleFactor)
+
+	screen.DrawImage(titleImg, titleOpts)
 }
 
-func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 680, 380
+func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+	return screenWidth, screenHeight
 }
 
 func main() {
-	ebiten.SetWindowSize(640, 480)
+	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Render an image")
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)
