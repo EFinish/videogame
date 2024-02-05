@@ -9,37 +9,38 @@ import (
 )
 
 var (
-	ticTacToeBoardImg *ebiten.Image
-	xImg              *ebiten.Image
-	oImg              *ebiten.Image
-	titleImg          *ebiten.Image
-	xTurnImg          *ebiten.Image
-	oTurnImg          *ebiten.Image
-	xWinningImg       *ebiten.Image
-	oWinningImg       *ebiten.Image
-	winner            string
-	isXTurn           bool = true
-	screenWidth       int  = 800
-	screenHeight      int  = 600
+	boardslotImg    *ebiten.Image
+	xImg            *ebiten.Image
+	oImg            *ebiten.Image
+	titleImg        *ebiten.Image
+	xTurnImg        *ebiten.Image
+	oTurnImg        *ebiten.Image
+	xWinningImg     *ebiten.Image
+	oWinningImg     *ebiten.Image
+	winner          string
+	isXTurn         bool = true
+	squareSelection int  = 0
+	screenWidth     int  = 800
+	screenHeight    int  = 600
 )
 
 func init() {
 	var err error
 
-	ticTacToeBoardImg, _, err = ebitenutil.NewImageFromFile("img/tic_tac_toe_board.png")
+	boardslotImg, _, err = ebitenutil.NewImageFromFile("img/boardslot.png")
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	xImg, _, err = ebitenutil.NewImageFromFile("img/x.png")
+	xImg, _, err = ebitenutil.NewImageFromFile("img/boardslot_x.png")
 
 	if err != nil {
 		log.Fatal(err)
 
 	}
 
-	oImg, _, err = ebitenutil.NewImageFromFile("img/o.png")
+	oImg, _, err = ebitenutil.NewImageFromFile("img/boardslot_o.png")
 
 	if err != nil {
 		log.Fatal(err)
@@ -86,15 +87,54 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	boardImgWidth := ticTacToeBoardImg.Bounds().Dx()
-	boardWidthScaleFactor := float64(screenWidth) / float64(boardImgWidth)
-	boardHeightScaleFactor := float64(screenHeight) * 0.60 / float64(ticTacToeBoardImg.Bounds().Dy())
-	boardOpts := &ebiten.DrawImageOptions{}
+	boardslotImgWidth := boardslotImg.Bounds().Dx()
+	boardslotWidthScaleFactor := float64(screenWidth) / 3 / float64(boardslotImgWidth)
+	boardslotHeightScaleFactor := float64(screenHeight) / 3 * 0.60 / float64(boardslotImg.Bounds().Dy())
 
-	boardOpts.GeoM.Scale(boardWidthScaleFactor, boardHeightScaleFactor)
-	boardOpts.GeoM.Translate(0, float64(screenHeight)*0.40)
+	boardslot1Opts := &ebiten.DrawImageOptions{}
+	boardslot1Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslot1Opts.GeoM.Translate(0, float64(screenHeight)*0.40)
+	screen.DrawImage(boardslotImg, boardslot1Opts)
 
-	screen.DrawImage(ticTacToeBoardImg, boardOpts)
+	boardslot2Opts := &ebiten.DrawImageOptions{}
+	boardslot2Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslot2Opts.GeoM.Translate(float64(screenWidth)*0.33, float64(screenHeight)*0.40)
+	screen.DrawImage(boardslotImg, boardslot2Opts)
+
+	boardslot3Opts := &ebiten.DrawImageOptions{}
+	boardslot3Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslot3Opts.GeoM.Translate(float64(screenWidth)*0.66, float64(screenHeight)*0.40)
+	screen.DrawImage(boardslotImg, boardslot3Opts)
+
+	boardslot4Opts := &ebiten.DrawImageOptions{}
+	boardslot4Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslot4Opts.GeoM.Translate(0, float64(screenHeight)*0.6)
+	screen.DrawImage(boardslotImg, boardslot4Opts)
+
+	boardslot5Opts := &ebiten.DrawImageOptions{}
+	boardslot5Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslot5Opts.GeoM.Translate(float64(screenWidth)*0.33, float64(screenHeight)*0.6)
+	screen.DrawImage(boardslotImg, boardslot5Opts)
+
+	boardslot6Opts := &ebiten.DrawImageOptions{}
+	boardslot6Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslot6Opts.GeoM.Translate(float64(screenWidth)*0.66, float64(screenHeight)*0.6)
+	screen.DrawImage(boardslotImg, boardslot6Opts)
+
+	boardslot7Opts := &ebiten.DrawImageOptions{}
+	boardslot7Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslot7Opts.GeoM.Translate(0, float64(screenHeight)*0.8)
+	screen.DrawImage(boardslotImg, boardslot7Opts)
+
+	boardslot8Opts := &ebiten.DrawImageOptions{}
+	boardslot8Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslot8Opts.GeoM.Translate(float64(screenWidth)*0.33, float64(screenHeight)*0.8)
+	screen.DrawImage(boardslotImg, boardslot8Opts)
+
+	boardslot9Opts := &ebiten.DrawImageOptions{}
+	boardslot9Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslot9Opts.GeoM.Translate(float64(screenWidth)*0.66, float64(screenHeight)*0.8)
+	screen.DrawImage(boardslotImg, boardslot9Opts)
 
 	titleImgWidth := titleImg.Bounds().Dx()
 	titleWidthScaleFactor := float64(screenWidth) / float64(titleImgWidth)
