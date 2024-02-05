@@ -8,76 +8,124 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+type IsXOrOEnum int
+
+const (
+	IsX IsXOrOEnum = iota
+	IsO
+	Niether
+)
+
+type Slot struct {
+	slotNumber   int
+	isSelected   bool
+	displayError bool
+	isXOrO       IsXOrOEnum
+}
+
 var (
-	boardslotImg    *ebiten.Image
-	xImg            *ebiten.Image
-	oImg            *ebiten.Image
-	titleImg        *ebiten.Image
-	xTurnImg        *ebiten.Image
-	oTurnImg        *ebiten.Image
-	xWinningImg     *ebiten.Image
-	oWinningImg     *ebiten.Image
-	winner          string
-	isXTurn         bool = true
-	squareSelection int  = 0
-	screenWidth     int  = 800
-	screenHeight    int  = 600
+	boardslotImg          *ebiten.Image
+	boardSlotSelectionImg *ebiten.Image
+	xSlotImg              *ebiten.Image
+	xSlotSelectionImg     *ebiten.Image
+	xSlotSelectionErrImg  *ebiten.Image
+	oSlotImg              *ebiten.Image
+	oSlotSelectionImg     *ebiten.Image
+	oSlotSelectionErrImg  *ebiten.Image
+	titleImg              *ebiten.Image
+	xTurnImg              *ebiten.Image
+	oTurnImg              *ebiten.Image
+	xWinningImg           *ebiten.Image
+	oWinningImg           *ebiten.Image
+	board                 [9]Slot
+	winner                string
+	whosTurn              IsXOrOEnum
+	screenWidth           int = 800
+	screenHeight          int = 600
 )
 
 func init() {
 	var err error
 
 	boardslotImg, _, err = ebitenutil.NewImageFromFile("img/boardslot.png")
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	xImg, _, err = ebitenutil.NewImageFromFile("img/boardslot_x.png")
+	boardSlotSelectionImg, _, err = ebitenutil.NewImageFromFile("img/boardslot_selection.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	xSlotImg, _, err = ebitenutil.NewImageFromFile("img/boardslot_x.png")
 	if err != nil {
 		log.Fatal(err)
 
 	}
 
-	oImg, _, err = ebitenutil.NewImageFromFile("img/boardslot_o.png")
+	xSlotSelectionImg, _, err = ebitenutil.NewImageFromFile("img/boardslot_selection_x.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	xSlotSelectionErrImg, _, err = ebitenutil.NewImageFromFile("img/boardslot_selection_err_x.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	oSlotImg, _, err = ebitenutil.NewImageFromFile("img/boardslot_o.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	oSlotSelectionImg, _, err = ebitenutil.NewImageFromFile("img/boardslot_selection_o.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	oSlotSelectionErrImg, _, err = ebitenutil.NewImageFromFile("img/boardslot_selection_err_o.png")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	titleImg, _, err = ebitenutil.NewImageFromFile("img/amazing_title.png")
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	xTurnImg, _, err = ebitenutil.NewImageFromFile("img/x_turn.png")
-
 	if err != nil {
 		log.Fatal(err)
 
 	}
 
 	oTurnImg, _, err = ebitenutil.NewImageFromFile("img/O_turn.png")
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	xWinningImg, _, err = ebitenutil.NewImageFromFile("img/x_wins.png")
-
 	if err != nil {
 		log.Fatal(err)
 
 	}
 
 	oWinningImg, _, err = ebitenutil.NewImageFromFile("img/o_wins.png")
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	board = [9]Slot{
+		{slotNumber: 0, isSelected: false, displayError: false, isXOrO: Niether},
+		{slotNumber: 1, isSelected: false, displayError: false, isXOrO: Niether},
+		{slotNumber: 2, isSelected: false, displayError: false, isXOrO: Niether},
+		{slotNumber: 3, isSelected: false, displayError: false, isXOrO: Niether},
+		{slotNumber: 4, isSelected: false, displayError: false, isXOrO: Niether},
+		{slotNumber: 5, isSelected: false, displayError: false, isXOrO: Niether},
+		{slotNumber: 6, isSelected: false, displayError: false, isXOrO: Niether},
+		{slotNumber: 7, isSelected: false, displayError: false, isXOrO: Niether},
+		{slotNumber: 8, isSelected: false, displayError: false, isXOrO: Niether},
+	}
 }
 
 type Game struct{}
@@ -89,52 +137,61 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	boardslotImgWidth := boardslotImg.Bounds().Dx()
 	boardslotWidthScaleFactor := float64(screenWidth) / 3 / float64(boardslotImgWidth)
-	boardslotHeightScaleFactor := float64(screenHeight) / 3 * 0.60 / float64(boardslotImg.Bounds().Dy())
+	boardslotHeightScaleFactor := float64(screenHeight) / 3 * 0.6 / float64(boardslotImg.Bounds().Dy())
 
-	boardslot1Opts := &ebiten.DrawImageOptions{}
-	boardslot1Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
-	boardslot1Opts.GeoM.Translate(0, float64(screenHeight)*0.40)
-	screen.DrawImage(boardslotImg, boardslot1Opts)
+	boardslotOpts0 := &ebiten.DrawImageOptions{}
+	boardslotOpts0.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslotOpts0.GeoM.Translate(0, float64(screenHeight)*0.4)
+	slotImg0 := getImgForSlot(0)
+	screen.DrawImage(slotImg0, boardslotOpts0)
 
-	boardslot2Opts := &ebiten.DrawImageOptions{}
-	boardslot2Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
-	boardslot2Opts.GeoM.Translate(float64(screenWidth)*0.33, float64(screenHeight)*0.40)
-	screen.DrawImage(boardslotImg, boardslot2Opts)
+	boardslotOpts1 := &ebiten.DrawImageOptions{}
+	boardslotOpts1.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslotOpts1.GeoM.Translate(float64(screenWidth)*0.33, float64(screenHeight)*0.4)
+	slotImg1 := getImgForSlot(1)
+	screen.DrawImage(slotImg1, boardslotOpts1)
 
-	boardslot3Opts := &ebiten.DrawImageOptions{}
-	boardslot3Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
-	boardslot3Opts.GeoM.Translate(float64(screenWidth)*0.66, float64(screenHeight)*0.40)
-	screen.DrawImage(boardslotImg, boardslot3Opts)
+	boardslotOpts2 := &ebiten.DrawImageOptions{}
+	boardslotOpts2.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslotOpts2.GeoM.Translate(float64(screenWidth)*0.66, float64(screenHeight)*0.4)
+	slotImg2 := getImgForSlot(2)
+	screen.DrawImage(slotImg2, boardslotOpts2)
 
-	boardslot4Opts := &ebiten.DrawImageOptions{}
-	boardslot4Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
-	boardslot4Opts.GeoM.Translate(0, float64(screenHeight)*0.6)
-	screen.DrawImage(boardslotImg, boardslot4Opts)
+	boardslotOpts3 := &ebiten.DrawImageOptions{}
+	boardslotOpts3.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslotOpts3.GeoM.Translate(0, float64(screenHeight)*0.6)
+	slotImg3 := getImgForSlot(3)
+	screen.DrawImage(slotImg3, boardslotOpts3)
 
-	boardslot5Opts := &ebiten.DrawImageOptions{}
-	boardslot5Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
-	boardslot5Opts.GeoM.Translate(float64(screenWidth)*0.33, float64(screenHeight)*0.6)
-	screen.DrawImage(boardslotImg, boardslot5Opts)
+	boardslotOpts4 := &ebiten.DrawImageOptions{}
+	boardslotOpts4.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslotOpts4.GeoM.Translate(float64(screenWidth)*0.33, float64(screenHeight)*0.6)
+	slotImg4 := getImgForSlot(4)
+	screen.DrawImage(slotImg4, boardslotOpts4)
 
-	boardslot6Opts := &ebiten.DrawImageOptions{}
-	boardslot6Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
-	boardslot6Opts.GeoM.Translate(float64(screenWidth)*0.66, float64(screenHeight)*0.6)
-	screen.DrawImage(boardslotImg, boardslot6Opts)
+	boardslotOpts5 := &ebiten.DrawImageOptions{}
+	boardslotOpts5.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslotOpts5.GeoM.Translate(float64(screenWidth)*0.66, float64(screenHeight)*0.6)
+	slotImg5 := getImgForSlot(5)
+	screen.DrawImage(slotImg5, boardslotOpts5)
 
-	boardslot7Opts := &ebiten.DrawImageOptions{}
-	boardslot7Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
-	boardslot7Opts.GeoM.Translate(0, float64(screenHeight)*0.8)
-	screen.DrawImage(boardslotImg, boardslot7Opts)
+	boardslotOpts6 := &ebiten.DrawImageOptions{}
+	boardslotOpts6.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslotOpts6.GeoM.Translate(0, float64(screenHeight)*0.8)
+	slotImg6 := getImgForSlot(6)
+	screen.DrawImage(slotImg6, boardslotOpts6)
 
-	boardslot8Opts := &ebiten.DrawImageOptions{}
-	boardslot8Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
-	boardslot8Opts.GeoM.Translate(float64(screenWidth)*0.33, float64(screenHeight)*0.8)
-	screen.DrawImage(boardslotImg, boardslot8Opts)
+	boardslotOpts7 := &ebiten.DrawImageOptions{}
+	boardslotOpts7.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslotOpts7.GeoM.Translate(float64(screenWidth)*0.33, float64(screenHeight)*0.8)
+	slotImg7 := getImgForSlot(7)
+	screen.DrawImage(slotImg7, boardslotOpts7)
 
-	boardslot9Opts := &ebiten.DrawImageOptions{}
-	boardslot9Opts.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
-	boardslot9Opts.GeoM.Translate(float64(screenWidth)*0.66, float64(screenHeight)*0.8)
-	screen.DrawImage(boardslotImg, boardslot9Opts)
+	boardslotOpts8 := &ebiten.DrawImageOptions{}
+	boardslotOpts8.GeoM.Scale(boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+	boardslotOpts8.GeoM.Translate(float64(screenWidth)*0.66, float64(screenHeight)*0.8)
+	slotImg8 := getImgForSlot(8)
+	screen.DrawImage(slotImg8, boardslotOpts8)
 
 	titleImgWidth := titleImg.Bounds().Dx()
 	titleWidthScaleFactor := float64(screenWidth) / float64(titleImgWidth)
@@ -146,6 +203,37 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.DrawImage(titleImg, titleOpts)
 
 	drawInfo(screen)
+}
+
+func getImgForSlot(slotNumber int) *ebiten.Image {
+	slot := board[slotNumber]
+
+	if slot.isSelected {
+		switch slot.isXOrO {
+		case IsX:
+			if slot.displayError {
+				return xSlotSelectionErrImg
+			}
+			return xSlotSelectionImg
+		case IsO:
+			if slot.displayError {
+				return oSlotSelectionErrImg
+			}
+			return oSlotSelectionImg
+		case Niether:
+			return boardSlotSelectionImg
+		}
+
+	}
+
+	switch slot.isXOrO {
+	case IsX:
+		return xSlotImg
+	case IsO:
+		return oSlotImg
+	}
+
+	return boardslotImg
 }
 
 func drawInfo(screen *ebiten.Image) {
@@ -168,7 +256,7 @@ func drawInfo(screen *ebiten.Image) {
 
 		return
 	}
-	if isXTurn {
+	if whosTurn == IsX {
 		screen.DrawImage(xTurnImg, infoOpts)
 
 		return
