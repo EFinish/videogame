@@ -6,6 +6,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type Direction int
@@ -175,23 +176,29 @@ func init() {
 type Game struct{}
 
 func (g *Game) Update() error {
-	if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyLeft) {
+	if repeatingKeyPressed(ebiten.KeyA) || repeatingKeyPressed(ebiten.KeyLeft) {
 		moveIfPossible(Left)
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyS) || ebiten.IsKeyPressed(ebiten.KeyDown) {
+	if repeatingKeyPressed(ebiten.KeyS) || repeatingKeyPressed(ebiten.KeyDown) {
 		moveIfPossible(Down)
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyRight) {
+	if repeatingKeyPressed(ebiten.KeyD) || repeatingKeyPressed(ebiten.KeyRight) {
 		moveIfPossible(Right)
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyUp) {
+	if repeatingKeyPressed(ebiten.KeyW) || repeatingKeyPressed(ebiten.KeyUp) {
 		moveIfPossible(Up)
 	}
 
 	return nil
+}
+
+func repeatingKeyPressed(key ebiten.Key) bool {
+	d := inpututil.KeyPressDuration(key)
+
+	return d == 1
 }
 
 func moveIfPossible(direction Direction) {
