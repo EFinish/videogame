@@ -8,6 +8,15 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+type Direction int
+
+const (
+	Up Direction = iota
+	Down
+	Left
+	Right
+)
+
 type IsXOrOEnum int
 
 const (
@@ -16,11 +25,19 @@ const (
 	Niether
 )
 
+type PossibleDirections struct {
+	Up    bool
+	Down  bool
+	Left  bool
+	Right bool
+}
+
 type Slot struct {
-	slotNumber   int
-	isSelected   bool
-	displayError bool
-	isXOrO       IsXOrOEnum
+	slotNumber         int
+	isSelected         bool
+	displayError       bool
+	isXOrO             IsXOrOEnum
+	possibleDirections PossibleDirections
 }
 
 var (
@@ -116,31 +133,114 @@ func init() {
 	}
 
 	board = [9]Slot{
-		{slotNumber: 0, isSelected: false, displayError: false, isXOrO: Niether},
-		{slotNumber: 1, isSelected: false, displayError: false, isXOrO: Niether},
-		{slotNumber: 2, isSelected: false, displayError: false, isXOrO: Niether},
-		{slotNumber: 3, isSelected: false, displayError: false, isXOrO: Niether},
-		{slotNumber: 4, isSelected: false, displayError: false, isXOrO: Niether},
-		{slotNumber: 5, isSelected: false, displayError: false, isXOrO: Niether},
-		{slotNumber: 6, isSelected: false, displayError: false, isXOrO: Niether},
-		{slotNumber: 7, isSelected: false, displayError: false, isXOrO: Niether},
-		{slotNumber: 8, isSelected: false, displayError: false, isXOrO: Niether},
+		{
+			slotNumber: 0, isSelected: true, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: false, Down: true, Left: false, Right: true},
+		},
+		{
+			slotNumber: 1, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: false, Down: true, Left: true, Right: true},
+		},
+		{
+			slotNumber: 2, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: false, Down: true, Left: true, Right: false},
+		},
+		{
+			slotNumber: 3, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: true, Down: true, Left: false, Right: true},
+		},
+		{
+			slotNumber: 4, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: true, Down: true, Left: true, Right: true},
+		},
+		{
+			slotNumber: 5, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: true, Down: true, Left: true, Right: false},
+		},
+		{
+			slotNumber: 6, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: true, Down: false, Left: false, Right: true},
+		},
+		{
+			slotNumber: 7, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: true, Down: false, Left: true, Right: true},
+		},
+		{
+			slotNumber: 8, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: true, Down: false, Left: true, Right: false},
+		},
 	}
 }
 
 type Game struct{}
 
 func (g *Game) Update() error {
+	if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyLeft) {
+		moveIfPossible(Left)
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyS) || ebiten.IsKeyPressed(ebiten.KeyDown) {
+		moveIfPossible(Down)
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyRight) {
+		moveIfPossible(Right)
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyUp) {
+		moveIfPossible(Up)
+	}
+
 	return nil
 }
 
+func moveIfPossible(direction Direction) {
+	currentSlotNumber := getSelectedSlotNumber()
+	currentSlot := &board[currentSlotNumber]
+
+	switch direction {
+	case Up:
+		if currentSlot.possibleDirections.Up {
+			currentSlot.isSelected = false
+			board[currentSlotNumber-3].isSelected = true
+		}
+	case Down:
+		if currentSlot.possibleDirections.Down {
+			currentSlot.isSelected = false
+			board[currentSlotNumber+3].isSelected = true
+		}
+	case Left:
+		if currentSlot.possibleDirections.Left {
+			currentSlot.isSelected = false
+			board[currentSlotNumber-1].isSelected = true
+		}
+	case Right:
+		if currentSlot.possibleDirections.Right {
+			currentSlot.isSelected = false
+			board[currentSlotNumber+1].isSelected = true
+		}
+	}
+}
+
+func getSelectedSlotNumber() int {
+	for i := 0; i < len(board); i++ {
+		if board[i].isSelected {
+			return board[i].slotNumber
+		}
+	}
+
+	log.Fatal("No slot is selected")
+	return 0
+}
+
 func (g *Game) Draw(screen *ebiten.Image) {
+	drawInfo(screen)
+	drawTitle(screen)
+
 	boardslotImgWidth := boardslotImg.Bounds().Dx()
 	boardslotWidthScaleFactor := float64(screenWidth) / 3 / float64(boardslotImgWidth)
 	boardslotHeightScaleFactor := float64(screenHeight) / 3 * 0.6 / float64(boardslotImg.Bounds().Dy())
 
-	drawInfo(screen)
-	drawTitle(screen)
 	drawImgForSlot(0, screen, boardslotWidthScaleFactor, boardslotHeightScaleFactor)
 	drawImgForSlot(1, screen, boardslotWidthScaleFactor, boardslotHeightScaleFactor)
 	drawImgForSlot(2, screen, boardslotWidthScaleFactor, boardslotHeightScaleFactor)
