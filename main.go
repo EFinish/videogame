@@ -56,7 +56,7 @@ var (
 	xWinningImg           *ebiten.Image
 	oWinningImg           *ebiten.Image
 	board                 [9]Slot
-	winner                string
+	winner                IsXOrOEnum
 	whosTurn              IsXOrOEnum
 	screenWidth           int = 800
 	screenHeight          int = 600
@@ -171,6 +171,8 @@ func init() {
 			possibleDirections: PossibleDirections{Up: true, Down: false, Left: true, Right: false},
 		},
 	}
+
+	winner = Niether
 }
 
 type Game struct{}
@@ -276,6 +278,8 @@ func setupTurnForNextUser() {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	detirmineIfWinner()
+
 	drawInfo(screen)
 	drawTitle(screen)
 
@@ -292,7 +296,58 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	drawImgForSlot(6, screen, boardslotWidthScaleFactor, boardslotHeightScaleFactor)
 	drawImgForSlot(7, screen, boardslotWidthScaleFactor, boardslotHeightScaleFactor)
 	drawImgForSlot(8, screen, boardslotWidthScaleFactor, boardslotHeightScaleFactor)
+}
 
+func detirmineIfWinner() {
+	if board[0].isXOrO == IsX && board[1].isXOrO == IsX && board[2].isXOrO == IsX {
+		winner = IsX
+	}
+	if board[3].isXOrO == IsX && board[4].isXOrO == IsX && board[5].isXOrO == IsX {
+		winner = IsX
+	}
+	if board[6].isXOrO == IsX && board[7].isXOrO == IsX && board[8].isXOrO == IsX {
+		winner = IsX
+	}
+	if board[0].isXOrO == IsX && board[3].isXOrO == IsX && board[6].isXOrO == IsX {
+		winner = IsX
+	}
+	if board[1].isXOrO == IsX && board[4].isXOrO == IsX && board[7].isXOrO == IsX {
+		winner = IsX
+	}
+	if board[2].isXOrO == IsX && board[5].isXOrO == IsX && board[8].isXOrO == IsX {
+		winner = IsX
+	}
+	if board[0].isXOrO == IsX && board[4].isXOrO == IsX && board[8].isXOrO == IsX {
+		winner = IsX
+	}
+	if board[2].isXOrO == IsX && board[4].isXOrO == IsX && board[6].isXOrO == IsX {
+		winner = IsX
+	}
+
+	if board[0].isXOrO == IsO && board[1].isXOrO == IsO && board[2].isXOrO == IsO {
+		winner = IsO
+	}
+	if board[3].isXOrO == IsO && board[4].isXOrO == IsO && board[5].isXOrO == IsO {
+		winner = IsO
+	}
+	if board[6].isXOrO == IsO && board[7].isXOrO == IsO && board[8].isXOrO == IsO {
+		winner = IsO
+	}
+	if board[0].isXOrO == IsO && board[3].isXOrO == IsO && board[6].isXOrO == IsO {
+		winner = IsO
+	}
+	if board[1].isXOrO == IsO && board[4].isXOrO == IsO && board[7].isXOrO == IsO {
+		winner = IsO
+	}
+	if board[2].isXOrO == IsO && board[5].isXOrO == IsO && board[8].isXOrO == IsO {
+		winner = IsO
+	}
+	if board[0].isXOrO == IsO && board[4].isXOrO == IsO && board[8].isXOrO == IsO {
+		winner = IsO
+	}
+	if board[2].isXOrO == IsO && board[4].isXOrO == IsO && board[6].isXOrO == IsO {
+		winner = IsO
+	}
 }
 
 func drawTitle(screen *ebiten.Image) {
@@ -315,12 +370,12 @@ func drawInfo(screen *ebiten.Image) {
 	infoOpts.GeoM.Scale(infoWidthScaleFactor, infoHeightScaleFactor)
 	infoOpts.GeoM.Translate(0, float64(screenHeight)*0.20)
 
-	if winner == "X" {
+	if winner == IsX {
 		screen.DrawImage(xWinningImg, infoOpts)
 
 		return
 	}
-	if winner == "O" {
+	if winner == IsO {
 		screen.DrawImage(oWinningImg, infoOpts)
 
 		return
@@ -403,7 +458,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
-	ebiten.SetWindowTitle("Render an image")
+	ebiten.SetWindowTitle("Tic Tac Toe - Amazing Game!")
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)
 	}
