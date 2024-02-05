@@ -139,6 +139,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	boardslotWidthScaleFactor := float64(screenWidth) / 3 / float64(boardslotImgWidth)
 	boardslotHeightScaleFactor := float64(screenHeight) / 3 * 0.6 / float64(boardslotImg.Bounds().Dy())
 
+	drawInfo(screen)
+	drawTitle(screen)
 	drawImgForSlot(0, screen, boardslotWidthScaleFactor, boardslotHeightScaleFactor)
 	drawImgForSlot(1, screen, boardslotWidthScaleFactor, boardslotHeightScaleFactor)
 	drawImgForSlot(2, screen, boardslotWidthScaleFactor, boardslotHeightScaleFactor)
@@ -149,16 +151,45 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	drawImgForSlot(7, screen, boardslotWidthScaleFactor, boardslotHeightScaleFactor)
 	drawImgForSlot(8, screen, boardslotWidthScaleFactor, boardslotHeightScaleFactor)
 
+}
+
+func drawTitle(screen *ebiten.Image) {
 	titleImgWidth := titleImg.Bounds().Dx()
 	titleWidthScaleFactor := float64(screenWidth) / float64(titleImgWidth)
 	titleHeightScaleFactor := float64(screenHeight) * 0.20 / float64(titleImg.Bounds().Dy())
 	titleOpts := &ebiten.DrawImageOptions{}
-
 	titleOpts.GeoM.Scale(titleWidthScaleFactor, titleHeightScaleFactor)
 
 	screen.DrawImage(titleImg, titleOpts)
+}
 
-	drawInfo(screen)
+func drawInfo(screen *ebiten.Image) {
+	infoImgWidth := xTurnImg.Bounds().Dx()
+	infoWidthScaleFactor := float64(screenWidth) / float64(infoImgWidth)
+	infoHeightScaleFactor := float64(screenHeight) * 0.20 / float64(xTurnImg.Bounds().Dy())
+
+	infoOpts := &ebiten.DrawImageOptions{}
+
+	infoOpts.GeoM.Scale(infoWidthScaleFactor, infoHeightScaleFactor)
+	infoOpts.GeoM.Translate(0, float64(screenHeight)*0.20)
+
+	if winner == "X" {
+		screen.DrawImage(xWinningImg, infoOpts)
+
+		return
+	}
+	if winner == "O" {
+		screen.DrawImage(oWinningImg, infoOpts)
+
+		return
+	}
+	if whosTurn == IsX {
+		screen.DrawImage(xTurnImg, infoOpts)
+
+		return
+	}
+
+	screen.DrawImage(oTurnImg, infoOpts)
 }
 
 func drawImgForSlot(slotNumber int, screen *ebiten.Image, standardSlotWidth float64, standardSlotHeight float64) {
@@ -222,35 +253,6 @@ func getImgForSlot(slotNumber int) *ebiten.Image {
 	}
 
 	return boardslotImg
-}
-
-func drawInfo(screen *ebiten.Image) {
-	infoImgWidth := xTurnImg.Bounds().Dx()
-	infoWidthScaleFactor := float64(screenWidth) / float64(infoImgWidth)
-	infoHeightScaleFactor := float64(screenHeight) * 0.20 / float64(xTurnImg.Bounds().Dy())
-
-	infoOpts := &ebiten.DrawImageOptions{}
-
-	infoOpts.GeoM.Scale(infoWidthScaleFactor, infoHeightScaleFactor)
-	infoOpts.GeoM.Translate(0, float64(screenHeight)*0.20)
-
-	if winner == "X" {
-		screen.DrawImage(xWinningImg, infoOpts)
-
-		return
-	}
-	if winner == "O" {
-		screen.DrawImage(oWinningImg, infoOpts)
-
-		return
-	}
-	if whosTurn == IsX {
-		screen.DrawImage(xTurnImg, infoOpts)
-
-		return
-	}
-
-	screen.DrawImage(oTurnImg, infoOpts)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
