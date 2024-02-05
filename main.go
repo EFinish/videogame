@@ -133,46 +133,7 @@ func init() {
 		log.Fatal(err)
 	}
 
-	board = [9]Slot{
-		{
-			slotNumber: 0, isSelected: true, displayError: false, isXOrO: Niether,
-			possibleDirections: PossibleDirections{Up: false, Down: true, Left: false, Right: true},
-		},
-		{
-			slotNumber: 1, isSelected: false, displayError: false, isXOrO: Niether,
-			possibleDirections: PossibleDirections{Up: false, Down: true, Left: true, Right: true},
-		},
-		{
-			slotNumber: 2, isSelected: false, displayError: false, isXOrO: Niether,
-			possibleDirections: PossibleDirections{Up: false, Down: true, Left: true, Right: false},
-		},
-		{
-			slotNumber: 3, isSelected: false, displayError: false, isXOrO: Niether,
-			possibleDirections: PossibleDirections{Up: true, Down: true, Left: false, Right: true},
-		},
-		{
-			slotNumber: 4, isSelected: false, displayError: false, isXOrO: Niether,
-			possibleDirections: PossibleDirections{Up: true, Down: true, Left: true, Right: true},
-		},
-		{
-			slotNumber: 5, isSelected: false, displayError: false, isXOrO: Niether,
-			possibleDirections: PossibleDirections{Up: true, Down: true, Left: true, Right: false},
-		},
-		{
-			slotNumber: 6, isSelected: false, displayError: false, isXOrO: Niether,
-			possibleDirections: PossibleDirections{Up: true, Down: false, Left: false, Right: true},
-		},
-		{
-			slotNumber: 7, isSelected: false, displayError: false, isXOrO: Niether,
-			possibleDirections: PossibleDirections{Up: true, Down: false, Left: true, Right: true},
-		},
-		{
-			slotNumber: 8, isSelected: false, displayError: false, isXOrO: Niether,
-			possibleDirections: PossibleDirections{Up: true, Down: false, Left: true, Right: false},
-		},
-	}
-
-	winner = Niether
+	startNewGame()
 }
 
 type Game struct{}
@@ -194,8 +155,12 @@ func (g *Game) Update() error {
 		moveIfPossible(Up)
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+	if repeatingKeyPressed(ebiten.KeyEnter) && winner == Niether {
 		attemptSlotSelection()
+	}
+
+	if repeatingKeyPressed(ebiten.KeyN) && winner != Niether {
+		startNewGame()
 	}
 
 	return nil
@@ -275,6 +240,50 @@ func setupTurnForNextUser() {
 		board[i].isSelected = false
 		board[i].displayError = false
 	}
+}
+
+func startNewGame() {
+	board = [9]Slot{
+		{
+			slotNumber: 0, isSelected: true, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: false, Down: true, Left: false, Right: true},
+		},
+		{
+			slotNumber: 1, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: false, Down: true, Left: true, Right: true},
+		},
+		{
+			slotNumber: 2, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: false, Down: true, Left: true, Right: false},
+		},
+		{
+			slotNumber: 3, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: true, Down: true, Left: false, Right: true},
+		},
+		{
+			slotNumber: 4, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: true, Down: true, Left: true, Right: true},
+		},
+		{
+			slotNumber: 5, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: true, Down: true, Left: true, Right: false},
+		},
+		{
+			slotNumber: 6, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: true, Down: false, Left: false, Right: true},
+		},
+		{
+			slotNumber: 7, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: true, Down: false, Left: true, Right: true},
+		},
+		{
+			slotNumber: 8, isSelected: false, displayError: false, isXOrO: Niether,
+			possibleDirections: PossibleDirections{Up: true, Down: false, Left: true, Right: false},
+		},
+	}
+
+	winner = Niether
+	whosTurn = IsX
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
