@@ -192,6 +192,10 @@ func (g *Game) Update() error {
 		moveIfPossible(Up)
 	}
 
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		attemptSlotSelection()
+	}
+
 	return nil
 }
 
@@ -229,6 +233,27 @@ func moveIfPossible(direction Direction) {
 	}
 }
 
+func attemptSlotSelection() {
+	currentSlotNumber := getSelectedSlotNumber()
+	currentSlot := &board[currentSlotNumber]
+
+	if currentSlot.isXOrO == Niether {
+		currentSlot.isXOrO = whosTurn
+		currentSlot.isSelected = false
+
+		setupTurnForNextUser()
+
+		if whosTurn == IsX {
+			whosTurn = IsO
+		} else {
+			whosTurn = IsX
+		}
+
+	} else {
+		currentSlot.displayError = true
+	}
+}
+
 func getSelectedSlotNumber() int {
 	for i := 0; i < len(board); i++ {
 		if board[i].isSelected {
@@ -238,6 +263,16 @@ func getSelectedSlotNumber() int {
 
 	log.Fatal("No slot is selected")
 	return 0
+}
+
+func setupTurnForNextUser() {
+	board[0].isSelected = true
+	board[0].displayError = false
+
+	for i := 1; i < len(board); i++ {
+		board[i].isSelected = false
+		board[i].displayError = false
+	}
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
