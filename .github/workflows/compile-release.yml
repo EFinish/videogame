@@ -20,9 +20,7 @@ jobs:
 
       - name: Build program
         run: |
-          GOOS=windows GOARCH=amd64 go build -o myprogram_windows_amd64.exe main.go
-          GOOS=darwin GOARCH=amd64 go build -o myprogram_darwin_amd64 main.go
-          GOOS=linux GOARCH=amd64 go build -o myprogram_linux_amd64 main.go
+          GOOS=windows GOARCH=amd64 go build -o tictactoe_windows_amd64.exe main.go
 
       - name: Create Release
         id: create_release
